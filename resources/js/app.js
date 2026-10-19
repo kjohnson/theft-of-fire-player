@@ -241,6 +241,15 @@ function renderChapterProgress() {
     });
 }
 
+/**
+ * Set an element's text only when it changes, as the scrubber renders every frame.
+ */
+function setText(element, text) {
+    if (element.textContent !== text) {
+        element.textContent = text;
+    }
+}
+
 function renderTime() {
     const total = duration();
     const time = state.scrubbing ? Number(ui.seek.value) : currentTime();
@@ -252,8 +261,8 @@ function renderTime() {
     }
 
     ui.seek.style.setProperty('--progress', `${(time / total) * 100}%`);
-    ui.elapsed.textContent = formatTime(time);
-    ui.remaining.textContent = `-${formatTime(total - time)}`;
+    setText(ui.elapsed, formatTime(time));
+    setText(ui.remaining, `-${formatTime(total - time)}`);
 
     let buffered = 0;
 
@@ -298,7 +307,6 @@ const reader = {
     words: [],
     current: -1,
     pausedUntil: 0,
-    frame: null,
 };
 
 const textRequests = new Map();
@@ -320,7 +328,7 @@ function renderView() {
         loadReader();
     }
 
-    syncReaderLoop();
+    syncFrameLoop();
 }
 
 function renderTextSize() {
@@ -532,23 +540,32 @@ function resumeFollowing() {
     highlightWord({ force: true });
 }
 
-/**
- * Word timings are finer than "timeupdate" (about 4 per second), so follow
- * along every frame while the text is on screen and the audio is playing.
- */
-function syncReaderLoop() {
-    const shouldRun = isReading() && !audio.paused && document.visibilityState === 'visible';
+let frame = null;
 
-    if (shouldRun && reader.frame === null) {
+/**
+ * "timeupdate" only fires about 4 times a second, which moves the scrubber in
+ * visible jumps on short tracks (a part's title is 5 seconds) and is coarser
+ * than the word timings. So while the audio plays and the page is visible,
+ * move the scrubber, and follow along in the text if it's open, every frame.
+ */
+function syncFrameLoop() {
+    const shouldRun = !audio.paused && document.visibilityState === 'visible';
+
+    if (shouldRun && frame === null) {
         const tick = () => {
-            highlightWord();
-            reader.frame = requestAnimationFrame(tick);
+            renderTime();
+
+            if (isReading()) {
+                highlightWord();
+            }
+
+            frame = requestAnimationFrame(tick);
         };
 
-        reader.frame = requestAnimationFrame(tick);
-    } else if (!shouldRun && reader.frame !== null) {
-        cancelAnimationFrame(reader.frame);
-        reader.frame = null;
+        frame = requestAnimationFrame(tick);
+    } else if (!shouldRun && frame !== null) {
+        cancelAnimationFrame(frame);
+        frame = null;
     }
 }
 
@@ -1176,12 +1193,12 @@ audio.addEventListener('timeupdate', () => {
 audio.addEventListener('progress', renderTime);
 audio.addEventListener('play', () => {
     renderPlayState();
-    syncReaderLoop();
+    syncFrameLoop();
     saveUpcoming();
 });
 audio.addEventListener('pause', () => {
     renderPlayState();
-    syncReaderLoop();
+    syncFrameLoop();
     save(true);
 });
 
@@ -1392,7 +1409,7 @@ document.addEventListener('visibilitychange', () => {
         save(true);
     }
 
-    syncReaderLoop();
+    syncFrameLoop();
 });
 
 window.addEventListener('pagehide', () => save(true));

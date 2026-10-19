@@ -108,7 +108,7 @@
                         type="range"
                         min="0"
                         max="{{ $book['chapters']->first()['duration'] }}"
-                        step="1"
+                        step="any"
                         value="0"
                         data-bind="seek"
                         class="scrubber"

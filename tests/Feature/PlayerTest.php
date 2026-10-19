@@ -21,18 +21,25 @@ class PlayerTest extends TestCase
             ->assertSee('The Edge of Sunlight');
     }
 
-    public function test_part_titles_are_listed_unnumbered_between_the_chapters(): void
+    public function test_part_titles_are_listed_as_headers_between_the_chapters(): void
     {
-        $this->get('/')
+        $response = $this->get('/');
+
+        $response
             ->assertOk()
             ->assertSeeInOrder(['Introduction', 'Epigraph', 'One Way Ticket', 'What the Cat Dragged In', 'Barsoom', 'Two Player Game', 'Frog and Scorpion', 'Five Step Process', 'The Same Deep Water', 'The Edge of Sunlight', 'Outro'])
             ->assertViewHas('books', function ($books) {
                 $numbers = $books->firstWhere('slug', 'theft-of-fire')['chapters']->pluck('number');
 
+                $parts = $books->firstWhere('slug', 'theft-of-fire')['chapters']->pluck('part');
+
                 return $numbers->take(5)->all() === [null, null, null, 1, 2]
                     && $numbers->filter()->values()->all() === range(1, 33)
-                    && $numbers->last() === null;
+                    && $numbers->last() === null
+                    && $parts->filter()->values()->all() === ['Part One', 'Part Two', 'Part Three', 'Part Four', 'Part Five'];
             });
+
+        $this->assertSame(5, substr_count($response->getContent(), 'part-row'));
     }
 
     public function test_the_whole_cast_is_credited(): void

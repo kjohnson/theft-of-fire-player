@@ -207,8 +207,30 @@
                     @endif
                     <ol class="space-y-1 {{ $loop->first ? '' : 'hidden' }}" data-book-chapters="{{ $listed['slug'] }}" aria-label="{{ $listed['title'] }}">
                         @foreach ($listed['chapters'] as $index => $chapter)
-                            <li class="chapter-item rounded-xl">
+                            <li class="chapter-item rounded-xl {{ $chapter['part'] && ! $loop->first ? 'mt-4' : '' }}">
                                 <div class="flex items-center">
+                                    @if ($chapter['part'])
+                                    <button
+                                        type="button"
+                                        data-book="{{ $listed['slug'] }}"
+                                        data-chapter="{{ $index }}"
+                                        class="tap chapter-row part-row flex min-w-0 flex-1 flex-col gap-1.5 rounded-xl px-3 pt-3 pb-2 text-left"
+                                    >
+                                        <span class="flex items-end justify-between gap-4">
+                                            <span class="min-w-0">
+                                                <span class="block text-xs font-semibold tracking-[0.2em] text-lime-400 uppercase">{{ $chapter['part'] }}</span>
+                                                <span class="block truncate text-lg font-semibold text-haze-50">{{ $chapter['title'] }}</span>
+                                            </span>
+                                            <span class="shrink-0 text-sm text-haze-400 tabular-nums">
+                                                {{ sprintf('%02d:%02d', intdiv((int) $chapter['duration'], 60), (int) $chapter['duration'] % 60) }}
+                                            </span>
+                                        </span>
+                                        {{-- The rule under the part's title fills as its track plays. --}}
+                                        <span class="block h-px overflow-hidden bg-white/15">
+                                            <span class="block h-full w-0 bg-lime-400" data-progress></span>
+                                        </span>
+                                    </button>
+                                    @else
                                     <button
                                         type="button"
                                         data-book="{{ $listed['slug'] }}"
@@ -232,6 +254,7 @@
                                             {{ sprintf('%02d:%02d', intdiv((int) $chapter['duration'], 60), (int) $chapter['duration'] % 60) }}
                                         </span>
                                     </button>
+                                    @endif
                                     <button
                                         type="button"
                                         data-chapter-options="{{ $index }}"

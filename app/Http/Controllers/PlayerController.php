@@ -27,7 +27,8 @@ class PlayerController extends Controller
                         ->values()
                         ->map(function (array $chapter, int $index) use ($slug, &$number): array {
                             return [
-                                'number' => $chapter['number'] ?? (($chapter['numbered'] ?? true) ? ++$number : null),
+                                'number' => $chapter['number'] ?? (($chapter['numbered'] ?? ! isset($chapter['part'])) ? ++$number : null),
+                                'part' => isset($chapter['part']) ? 'Part '.self::spell($chapter['part']) : null,
                                 'title' => $chapter['title'],
                                 'duration' => $chapter['duration'],
                                 'url' => AudioController::signedUrl($slug, $index + 1),
@@ -58,5 +59,13 @@ class PlayerController extends Controller
         $file = public_path($path);
 
         return is_file($file) ? asset($path).'?v='.substr(hash_file('xxh3', $file), 0, 8) : asset($path);
+    }
+
+    /**
+     * A part's number in words ("Part One"), as the book's contents give it.
+     */
+    private static function spell(int $number): string
+    {
+        return [1 => 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'][$number] ?? (string) $number;
     }
 }

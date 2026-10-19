@@ -60,7 +60,9 @@ return [
     | ffprobe -v error -show_entries format=duration -of csv=p=0 file.mp3
     |
     | Set "numbered" to false for tracks that aren't chapters, like the
-    | credits or a part's title, so they're listed without a chapter number.
+    | credits, so they're listed without a chapter number. Set "part" to the
+    | number of a part's title track instead, to list it as a header row
+    | ("Part One") above that part's chapters.
     | A chapter's "number" can be set instead, and a book's "chapter_name"
     | names its chapters.
     |
@@ -91,7 +93,7 @@ return [
                     'title' => 'One Way Ticket',
                     'file' => 'part-1-one-way-ticket.mp3',
                     'duration' => 4.96,
-                    'numbered' => false,
+                    'part' => 1,
                 ],
                 [
                     'title' => 'What the Cat Dragged In',
@@ -127,7 +129,7 @@ return [
                     'title' => 'Two Player Game',
                     'file' => 'part-2-two-player-game.mp3',
                     'duration' => 4.96,
-                    'numbered' => false,
+                    'part' => 2,
                 ],
                 [
                     'title' => 'Frog and Scorpion',
@@ -175,7 +177,7 @@ return [
                     'title' => 'Three Body Problem',
                     'file' => 'part-3-three-body-problem.mp3',
                     'duration' => 4.96,
-                    'numbered' => false,
+                    'part' => 3,
                 ],
                 [
                     'title' => 'You Need Therapy',
@@ -217,7 +219,7 @@ return [
                     'title' => 'Four Letter Words',
                     'file' => 'part-4-four-letter-words.mp3',
                     'duration' => 4.96,
-                    'numbered' => false,
+                    'part' => 4,
                 ],
                 [
                     'title' => 'This Is What I Do',
@@ -277,7 +279,7 @@ return [
                     'title' => 'Five Step Process',
                     'file' => 'part-5-five-step-process.mp3',
                     'duration' => 5.07,
-                    'numbered' => false,
+                    'part' => 5,
                 ],
                 [
                     'title' => 'The Same Deep Water',

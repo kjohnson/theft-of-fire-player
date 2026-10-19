@@ -204,7 +204,7 @@ function chapterLabel(chapter) {
 function renderChapter() {
     const chapter = chapters[state.chapter];
 
-    ui.chapterLabel.textContent = chapter.number ? chapterLabel(chapter) : book.title;
+    ui.chapterLabel.textContent = chapter.number ? chapterLabel(chapter) : chapter.part ?? book.title;
     ui.chapterTitle.textContent = chapter.title;
     ui.bookLabel.textContent = book.label;
     ui.bookTitle.textContent = book.title;
@@ -726,7 +726,11 @@ function updateMediaSession() {
     const chapter = chapters[state.chapter];
 
     navigator.mediaSession.metadata = new MediaMetadata({
-        title: chapter.number ? `${book.chapterName === 'Chapter' ? 'Ch.' : book.chapterName} ${chapter.number}: ${chapter.title}` : chapter.title,
+        title: chapter.number
+            ? `${book.chapterName === 'Chapter' ? 'Ch.' : book.chapterName} ${chapter.number}: ${chapter.title}`
+            : chapter.part
+              ? `${chapter.part}: ${chapter.title}`
+              : chapter.title,
         artist: series.author,
         album: book.title,
         artwork: [{ src: book.cover, sizes: '1024x1024', type: 'image/jpeg' }],

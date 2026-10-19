@@ -7,7 +7,7 @@ use Tests\TestCase;
 
 class TextTest extends TestCase
 {
-    private const BOOK = 'after-moses';
+    private const BOOK = 'theft-of-fire';
 
     private const SYNCED_TEXT = '{"blocks":[{"tag":"p","words":["Hello","world."]}],"timings":[0,0.5,0.5,1]}';
 
@@ -45,7 +45,15 @@ class TextTest extends TestCase
 
     public function test_another_books_chapter_has_its_own_text(): void
     {
-        $this->get('/text/prodigal/1', $this->playerHeaders())->assertNotFound();
+        config(['audiobook.books.book-two' => [
+            'title' => 'Book Two',
+            'label' => 'Book 2',
+            'narrator' => 'Dain Little',
+            'cover' => 'images/book-two.jpg',
+            'chapters' => [['title' => 'First Light', 'file' => 'chapter-01-first-light.mp3', 'duration' => 10.0]],
+        ]]);
+
+        $this->get('/text/book-two/1', $this->playerHeaders())->assertNotFound();
     }
 
     public function test_unknown_chapter_is_not_found(): void

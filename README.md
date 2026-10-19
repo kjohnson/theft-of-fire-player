@@ -1,11 +1,12 @@
-# After Moses — Audiobook Player
+# Theft of Fire — Audiobook Player
 
-A mobile-first Laravel site for listening to the *After Moses* audiobooks by Michael F. Kane, narrated by
-Randy McCarten:
+A mobile-first Laravel site for listening to *Theft of Fire* (Orbital Space #1) by Devon Eriksen, voiced by
+Dain Little, Emma Rae, and Ashley Crossman. Based on the
+[After Moses player](https://github.com/kjohnson/after-moses-player).
 
-1. *After Moses*
-2. *Splendid Sam*, the radio drama from inside the story: episode 387, "For a Dozen Quid of Platinum", read by Son of Sonnet
-3. *Prodigal*
+The audiobook has a short track for each of the book's five parts (One Way Ticket, Two Player Game, Three Body
+Problem, Four Letter Words, Five Step Process). They're listed between the chapters, unnumbered, as
+`part-1-one-way-ticket.mp3` and so on.
 
 - Books and chapter list with per-chapter progress; finishing a book carries on into the next
 - Resume where you left off (saved in the browser's localStorage)
@@ -36,10 +37,10 @@ Each book has an entry in `books` in `config/audiobook.php` (in reading order) a
 `storage/app/private/`, named after its key:
 
 ```
-storage/app/private/prodigal/
-    After Moses Prodigal.epub
-    audio/chapter-01-a-rumor-bound-in-journal.mp3, …
-    transcripts/chapter-01-a-rumor-bound-in-journal.json, …
+storage/app/private/theft-of-fire/
+    Theft of Fire - Devon Eriksen.epub
+    audio/introduction.mp3, epigraph.mp3, part-1-one-way-ticket.mp3, chapter-01-what-the-cat-dragged-in.mp3, …
+    transcripts/chapter-01-what-the-cat-dragged-in.json, …
     text/chapter-01.json, …              (written by audiobook:sync)
 ```
 
@@ -56,7 +57,7 @@ The audio and transcripts aren't committed to git; the synced text is. Its cover
    `false` for tracks that aren't chapters, like the credits:
 
    ```sh
-   ffprobe -v error -show_entries format=duration -of csv=p=0 storage/app/private/after-moses/audio/chapter-04-some-title.mp3
+   ffprobe -v error -show_entries format=duration -of csv=p=0 storage/app/private/theft-of-fire/audio/chapter-04-some-title.mp3
    ```
 
 3. Upload it to the bucket with `php artisan audiobook:upload s3`.
@@ -64,14 +65,16 @@ The audio and transcripts aren't committed to git; the synced text is. Its cover
 ## Follow-along text
 
 Put a WhisperX JSON transcript of each chapter in the book's `transcripts/` folder, named after its MP3, and
-run `php artisan audiobook:sync` (or `php artisan audiobook:sync after-moses 4` for one chapter of one book).
+run `php artisan audiobook:sync` (or `php artisan audiobook:sync theft-of-fire 7` for one track of one book).
 Chapters are found in the ebook by a "Chapter N" title matching their place in the list, or by their `epub`
-key when the list doesn't line up with the ebook (Prodigal starts with the opening credits):
+key when the list doesn't line up with the ebook (Theft of Fire's list starts with the introduction and
+epigraph, and has a track for each part's title, so every chapter has one). Tracks without text in the ebook,
+like the part titles, are skipped:
 
 ```sh
-whisperx storage/app/private/after-moses/audio/chapter-04-the-hawthorne-pact.mp3 --model small.en --language en \
-    --compute_type int8 --output_format json --output_dir storage/app/private/after-moses/transcripts
-php artisan audiobook:sync after-moses 4
+whisperx storage/app/private/theft-of-fire/audio/chapter-04-mutually-assured-destruction.mp3 --model small.en --language en \
+    --compute_type int8 --output_format json --output_dir storage/app/private/theft-of-fire/transcripts
+php artisan audiobook:sync theft-of-fire 7
 ```
 
 The synced text lands in the book's `text/` folder. Chapters without it don't show the text button.

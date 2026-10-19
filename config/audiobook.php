@@ -70,7 +70,7 @@ return [
         'theft-of-fire' => [
             'title' => 'Theft of Fire',
             'label' => 'Book 1',
-            'narrator' => 'Dane Little',
+            'narrator' => 'Dain Little, Emma Rae, and Ashley Crossman',
             'cover' => 'images/theft-of-fire.jpg',
             'ebook' => 'Theft of Fire - Devon Eriksen.epub',
             'chapters' => [

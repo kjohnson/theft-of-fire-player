@@ -12,47 +12,35 @@ class PlayerTest extends TestCase
         $response = $this->get('/');
 
         $response->assertOk()
-            ->assertSee('After Moses')
-            ->assertSee('Europan Extraction')
-            ->assertSee('Rings of Interferance')
-            ->assertSee('Train to Churchill')
-            ->assertSee('The Hawthorne Pact')
-            ->assertSee('Bright Crater Diagnosis')
-            ->assertSee('Islands in the Night');
+            ->assertSee('Theft of Fire')
+            ->assertSee('What the Cat Dragged In')
+            ->assertSee('A List of Things That Won’t Happen')
+            ->assertSee('We Don’t Go to Sedna')
+            ->assertSee('Mutually Assured Destruction')
+            ->assertSee('Barsoom')
+            ->assertSee('The Edge of Sunlight');
     }
 
-    public function test_player_lists_every_book_in_reading_order(): void
+    public function test_part_titles_are_listed_unnumbered_between_the_chapters(): void
     {
         $this->get('/')
             ->assertOk()
-            ->assertSeeInOrder(['After Moses', 'Splendid Sam', 'Prodigal'])
-            ->assertViewHas('books', fn ($books) => $books->pluck('slug')->all() === ['after-moses', 'splendid-sam', 'prodigal']
-                && $books->pluck('label')->all() === ['Book 1', 'Radio drama', 'Book 2']);
-    }
-
-    public function test_splendid_sam_is_listed_by_its_episode_number(): void
-    {
-        $this->get('/')
-            ->assertOk()
-            ->assertSee('For a Dozen Quid of Platinum')
-            ->assertDontSee('Episode 387: For a Dozen Quid of Platinum')
-            ->assertSee('Son of Sonnet')
+            ->assertSeeInOrder(['Introduction', 'Epigraph', 'One Way Ticket', 'What the Cat Dragged In', 'Barsoom', 'Two Player Game', 'Frog and Scorpion', 'Five Step Process', 'The Same Deep Water', 'The Edge of Sunlight', 'Outro'])
             ->assertViewHas('books', function ($books) {
-                $book = $books->firstWhere('slug', 'splendid-sam');
+                $numbers = $books->firstWhere('slug', 'theft-of-fire')['chapters']->pluck('number');
 
-                return $book['chapterName'] === 'Episode'
-                    && $book['chapters']->count() === 1
-                    && $book['chapters']->first()['number'] === 387;
+                return $numbers->take(5)->all() === [null, null, null, 1, 2]
+                    && $numbers->filter()->values()->all() === range(1, 33)
+                    && $numbers->last() === null;
             });
     }
 
-    public function test_player_lists_prodigals_chapters(): void
+    public function test_the_whole_cast_is_credited(): void
     {
         $this->get('/')
             ->assertOk()
-            ->assertSee('A Rumor Bound in Journal')
-            ->assertSee('The Prodigal of Ceres')
-            ->assertDontSee('Coming soon');
+            ->assertSee('Devon Eriksen')
+            ->assertSee('Dain Little, Emma Rae, and Ashley Crossman');
     }
 
     public function test_a_book_without_chapters_is_listed_as_coming_soon(): void
@@ -60,7 +48,7 @@ class PlayerTest extends TestCase
         config(['audiobook.books.book-three' => [
             'title' => 'Book Three',
             'label' => 'Book 3',
-            'narrator' => 'Randy McCarten',
+            'narrator' => 'Dain Little',
             'cover' => 'images/book-three.jpg',
             'ebook' => 'Book Three.epub',
             'chapters' => [],
@@ -79,7 +67,7 @@ class PlayerTest extends TestCase
         config(['audiobook.books.book-three' => [
             'title' => 'Book Three',
             'label' => 'Book 3',
-            'narrator' => 'Randy McCarten',
+            'narrator' => 'Dain Little',
             'cover' => 'images/book-three.jpg',
             'chapters' => [],
             'upcoming_chapters' => ['First Light'],
@@ -90,8 +78,7 @@ class PlayerTest extends TestCase
 
         $this->assertSame($chapterCount, substr_count($response->getContent(), 'data-chapter-options='));
         $this->assertSame($chapterCount, substr_count($response->getContent(), 'data-action="reset-progress"'));
-        $response->assertSeeInOrder(['aria-label="Options for Europan Extraction"', 'id="actions-after-moses-0"', 'Reset progress'], false)
-            ->assertSee('aria-controls="actions-prodigal-0"', false)
+        $response->assertSeeInOrder(['aria-label="Options for Introduction"', 'id="actions-theft-of-fire-0"', 'Reset progress'], false)
             ->assertDontSee('data-options-book="book-three"', false);
     }
 
@@ -112,11 +99,11 @@ class PlayerTest extends TestCase
 
     public function test_cover_urls_change_when_the_cover_does(): void
     {
-        $hash = substr(hash_file('xxh3', public_path('images/splendid-sam.jpg')), 0, 8);
+        $hash = substr(hash_file('xxh3', public_path('images/theft-of-fire.jpg')), 0, 8);
 
         $this->get('/')
             ->assertOk()
-            ->assertViewHas('books', fn ($books) => $books->firstWhere('slug', 'splendid-sam')['cover'] === asset('images/splendid-sam.jpg').'?v='.$hash);
+            ->assertViewHas('books', fn ($books) => $books->firstWhere('slug', 'theft-of-fire')['cover'] === asset('images/theft-of-fire.jpg').'?v='.$hash);
     }
 
     public function test_player_links_to_signed_audio_urls_instead_of_files(): void
@@ -127,7 +114,7 @@ class PlayerTest extends TestCase
             ->assertViewHas('books', function ($books) {
                 $url = $books->first()['chapters']->first()['url'];
 
-                return str_starts_with($url, url('/audio/after-moses/1?expires='))
+                return str_starts_with($url, url('/audio/theft-of-fire/1?expires='))
                     && str_contains($url, 'signature=');
             });
     }
@@ -135,12 +122,12 @@ class PlayerTest extends TestCase
     public function test_player_knows_each_chapters_download_size(): void
     {
         Storage::fake('local');
-        Storage::disk('local')->put('after-moses/audio/'.config('audiobook.books.after-moses.chapters.0.file'), str_repeat('a', 1234));
+        Storage::disk('local')->put('theft-of-fire/audio/'.config('audiobook.books.theft-of-fire.chapters.0.file'), str_repeat('a', 1234));
 
         $this->get('/')
             ->assertOk()
             ->assertViewHas('books', function ($books) {
-                $chapters = $books->firstWhere('slug', 'after-moses')['chapters'];
+                $chapters = $books->firstWhere('slug', 'theft-of-fire')['chapters'];
 
                 return $chapters[0]['size'] === 1234 && $chapters[1]['size'] === null;
             });

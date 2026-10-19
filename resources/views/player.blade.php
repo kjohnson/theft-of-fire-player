@@ -208,6 +208,18 @@
                     <ol class="space-y-1 {{ $loop->first ? '' : 'hidden' }}" data-book-chapters="{{ $listed['slug'] }}" aria-label="{{ $listed['title'] }}">
                         @foreach ($listed['chapters'] as $index => $chapter)
                             <li class="chapter-item rounded-xl">
+                                @if ($chapter['part'])
+                                    {{-- A part's title track: always plays from the start, so no progress, length or options. --}}
+                                    <button
+                                        type="button"
+                                        data-book="{{ $listed['slug'] }}"
+                                        data-chapter="{{ $index }}"
+                                        class="tap chapter-row flex w-full min-w-0 items-center gap-3 rounded-xl px-3 py-3 text-left"
+                                    >
+                                        <span class="flex h-9 shrink-0 items-center text-xs font-semibold tracking-[0.2em] whitespace-nowrap text-lime-400 uppercase">{{ $chapter['part'] }}</span>
+                                        <span class="min-w-0 flex-1 truncate font-semibold">{{ $chapter['title'] }}</span>
+                                    </button>
+                                @else
                                 <div class="flex items-center">
                                     <button
                                         type="button"
@@ -218,8 +230,6 @@
                                         <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/5 text-sm font-semibold tabular-nums text-haze-300 chapter-number">
                                             @if ($chapter['number'])
                                                 {{ $chapter['number'] }}
-                                            @elseif ($chapter['numeral'])
-                                                <span class="font-serif tracking-wide" aria-label="{{ $chapter['part'] }}">{{ $chapter['numeral'] }}</span>
                                             @else
                                                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></svg>
                                             @endif
@@ -249,6 +259,7 @@
                                 <div id="actions-{{ $listed['slug'] }}-{{ $index }}" class="hidden justify-end gap-2 px-3 pb-3 [&:not(.hidden)]:flex" data-chapter-actions>
                                     <button type="button" data-action="reset-progress" class="tap rounded-full px-3 py-1.5 text-sm text-haze-300 ring-1 ring-white/15">Reset progress</button>
                                 </div>
+                                @endif
                             </li>
                         @endforeach
                     </ol>

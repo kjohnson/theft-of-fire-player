@@ -21,7 +21,7 @@ class PlayerTest extends TestCase
             ->assertSee('The Edge of Sunlight');
     }
 
-    public function test_part_titles_are_listed_with_roman_numerals_between_the_chapters(): void
+    public function test_part_titles_are_listed_between_the_chapters(): void
     {
         $response = $this->get('/');
 
@@ -39,7 +39,8 @@ class PlayerTest extends TestCase
                     && $parts->filter()->values()->all() === ['Part One', 'Part Two', 'Part Three', 'Part Four', 'Part Five'];
             });
 
-        $response->assertSeeInOrder(['>I<', 'One Way Ticket', '>II<', 'Two Player Game', '>V<', 'Five Step Process'], false);
+        $response->assertSeeInOrder(['Part One', 'One Way Ticket', 'Part Two', 'Two Player Game', 'Part Five', 'Five Step Process'])
+            ->assertDontSee('aria-label="Options for One Way Ticket"', false);
     }
 
     public function test_the_whole_cast_is_credited(): void
@@ -89,7 +90,8 @@ class PlayerTest extends TestCase
         ]]);
 
         $response = $this->get('/')->assertOk();
-        $chapterCount = collect(config('audiobook.books'))->sum(fn (array $book): int => count($book['chapters']));
+        // Parts' title tracks always play from the start, so they have no progress to reset.
+        $chapterCount = collect(config('audiobook.books'))->flatMap(fn (array $book): array => $book['chapters'])->whereNull('part')->count();
 
         $this->assertSame($chapterCount, substr_count($response->getContent(), 'data-chapter-options='));
         $this->assertSame($chapterCount, substr_count($response->getContent(), 'data-action="reset-progress"'));

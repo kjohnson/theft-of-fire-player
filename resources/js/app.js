@@ -112,7 +112,8 @@ function save(force = false) {
     lastSave = now;
 
     // Only record the playhead once the current chapter's audio is actually loaded.
-    if (state.booted && state.pendingSeek === null && audio.readyState >= HTMLMediaElement.HAVE_METADATA) {
+    // Parts' title tracks always play from the start, so their place isn't kept.
+    if (state.booted && state.pendingSeek === null && audio.readyState >= HTMLMediaElement.HAVE_METADATA && !chapters[state.chapter].part) {
         state.positions[state.chapter] = Math.floor(audio.currentTime);
     }
 
@@ -229,7 +230,7 @@ function renderChapter() {
 }
 
 function renderChapterProgress() {
-    document.querySelectorAll('[data-chapter]').forEach((row) => {
+    document.querySelectorAll('[data-chapter]:has([data-progress])').forEach((row) => {
         const slug = row.dataset.book;
         const index = Number(row.dataset.chapter);
         const playing = slug === state.book && index === state.chapter;
@@ -570,14 +571,17 @@ function selectChapter(index, { autoplay = false, position, book: slug = state.b
     const chapter = chapters[index];
     let start = position ?? state.positions[index] ?? 0;
 
-    // A finished chapter starts over rather than resuming at the very end.
-    if (start >= chapter.duration - 2) {
+    // A finished chapter starts over rather than resuming at the very end, and a part's title always does.
+    if (start >= chapter.duration - 2 || chapter.part) {
         start = 0;
     }
 
     state.chapter = index;
     state.pendingSeek = start;
-    state.positions[index] = start;
+
+    if (!chapter.part) {
+        state.positions[index] = start;
+    }
 
     if (audio.src !== chapter.url) {
         audio.src = chapter.url;
@@ -1195,7 +1199,9 @@ for (const event of ['playing', 'canplay', 'seeked']) {
 }
 
 audio.addEventListener('ended', () => {
-    state.positions[state.chapter] = chapters[state.chapter].duration;
+    if (!chapters[state.chapter].part) {
+        state.positions[state.chapter] = chapters[state.chapter].duration;
+    }
 
     const following = followingChapter();
 

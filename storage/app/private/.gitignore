@@ -1,0 +1,5 @@
+*
+!.gitignore
+!*/
+!*/text/
+!*/text/*.json

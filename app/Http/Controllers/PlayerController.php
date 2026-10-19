@@ -29,6 +29,7 @@ class PlayerController extends Controller
                             return [
                                 'number' => $chapter['number'] ?? (($chapter['numbered'] ?? ! isset($chapter['part'])) ? ++$number : null),
                                 'part' => isset($chapter['part']) ? 'Part '.self::spell($chapter['part']) : null,
+                                'numeral' => isset($chapter['part']) ? self::roman($chapter['part']) : null,
                                 'title' => $chapter['title'],
                                 'duration' => $chapter['duration'],
                                 'url' => AudioController::signedUrl($slug, $index + 1),
@@ -67,5 +68,13 @@ class PlayerController extends Controller
     private static function spell(int $number): string
     {
         return [1 => 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'][$number] ?? (string) $number;
+    }
+
+    /**
+     * A part's number as a Roman numeral, for its icon in the chapter list.
+     */
+    private static function roman(int $number): string
+    {
+        return [1 => 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'][$number] ?? (string) $number;
     }
 }

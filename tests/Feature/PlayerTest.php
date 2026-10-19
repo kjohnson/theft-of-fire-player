@@ -21,7 +21,7 @@ class PlayerTest extends TestCase
             ->assertSee('The Edge of Sunlight');
     }
 
-    public function test_part_titles_are_listed_as_headers_between_the_chapters(): void
+    public function test_part_titles_are_listed_with_roman_numerals_between_the_chapters(): void
     {
         $response = $this->get('/');
 
@@ -39,7 +39,7 @@ class PlayerTest extends TestCase
                     && $parts->filter()->values()->all() === ['Part One', 'Part Two', 'Part Three', 'Part Four', 'Part Five'];
             });
 
-        $this->assertSame(5, substr_count($response->getContent(), 'part-row'));
+        $response->assertSeeInOrder(['>I<', 'One Way Ticket', '>II<', 'Two Player Game', '>V<', 'Five Step Process'], false);
     }
 
     public function test_the_whole_cast_is_credited(): void

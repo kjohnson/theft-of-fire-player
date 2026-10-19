@@ -61,8 +61,8 @@ return [
     |
     | Set "numbered" to false for tracks that aren't chapters, like the
     | credits, so they're listed without a chapter number. Set "part" to the
-    | number of a part's title track instead, to list it as a header row
-    | ("Part One") above that part's chapters.
+    | number of a part's title track instead, to list it with that number as
+    | a Roman numeral and show it as "Part One" while it plays.
     | A chapter's "number" can be set instead, and a book's "chapter_name"
     | names its chapters.
     |

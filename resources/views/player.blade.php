@@ -18,7 +18,7 @@
         <title>{{ $series['title'] }} — Audiobooks</title>
 
         <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-        <link rel="icon" type="image/png" href="{{ asset('images/icon-192.png') }}">
+        <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
         <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
         <link rel="preload" as="image" href="{{ $book['cover'] }}">
 

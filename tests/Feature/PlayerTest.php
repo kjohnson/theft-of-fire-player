@@ -43,6 +43,14 @@ class PlayerTest extends TestCase
             ->assertSee('Dain Little, Emma Rae, and Ashley Crossman');
     }
 
+    public function test_the_book_selector_is_shown_even_with_one_book(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('role="group" aria-label="Books"', false)
+            ->assertSee('data-show-book="theft-of-fire"', false);
+    }
+
     public function test_a_book_without_chapters_is_listed_as_coming_soon(): void
     {
         config(['audiobook.books.book-three' => [

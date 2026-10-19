@@ -54,6 +54,31 @@ class UploadAudiobookTest extends TestCase
         $this->assertSame('{}', Storage::disk('s3')->get('first/text/chapter-01.json'));
     }
 
+    public function test_the_bucket_can_be_named_by_the_laravel_cloud_disk_config(): void
+    {
+        $_SERVER['LARAVEL_CLOUD_DISK_CONFIG'] = json_encode([[
+            'disk' => 'bucket',
+            'access_key_id' => 'key',
+            'access_key_secret' => 'secret',
+            'bucket' => 'audiobooks',
+            'url' => null,
+            'endpoint' => 'https://example.com',
+            'is_default' => true,
+        ]]);
+
+        try {
+            $this->artisan('audiobook:upload', ['disk' => 'missing'])->assertFailed();
+        } catch (\InvalidArgumentException) {
+            // The command only adds the disks in the config.
+        }
+
+        $this->assertSame('s3', config('filesystems.disks.bucket.driver'));
+        $this->assertSame('audiobooks', config('filesystems.disks.bucket.bucket'));
+        $this->assertSame('local', config('filesystems.default'));
+
+        unset($_SERVER['LARAVEL_CLOUD_DISK_CONFIG']);
+    }
+
     public function test_uploading_to_the_source_disk_fails(): void
     {
         $this->artisan('audiobook:upload', ['disk' => 'local'])->assertFailed();

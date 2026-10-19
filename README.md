@@ -60,7 +60,7 @@ The audio and transcripts aren't committed to git; the synced text is. Its cover
    ffprobe -v error -show_entries format=duration -of csv=p=0 storage/app/private/theft-of-fire/audio/chapter-04-some-title.mp3
    ```
 
-3. Upload it to the bucket with `php artisan audiobook:upload s3`.
+3. Upload it to the bucket with `php artisan audiobook:upload private`.
 
 ## Follow-along text
 
@@ -97,21 +97,15 @@ up the bucket:
 1. Add a **private** Laravel Object Storage bucket to the environment and mark it as the **default disk**
    (any disk name). Redeploy so the bucket's connection is injected. Listeners are then redirected to
    short-lived pre-signed URLs.
-2. Copy one of the bucket's access keys (Organization > Resources > Object storage > your bucket >
-   Access keys > View credentials) into your local `.env`:
-
-   ```dotenv
-   AWS_ACCESS_KEY_ID=…
-   AWS_SECRET_ACCESS_KEY=…
-   AWS_BUCKET=…
-   AWS_ENDPOINT=…
-   AWS_DEFAULT_REGION=auto
-   ```
+2. Copy the environment's `LARAVEL_CLOUD_DISK_CONFIG` variable into your local `.env`, keeping
+   `FILESYSTEM_DISK=local` so local work still uses local storage. `audiobook:upload` reads the bucket from it,
+   under the disk name it was given in Cloud (e.g. `private`). Alternatively, set the `AWS_*` variables to one
+   of the bucket's access keys and upload to `s3`.
 
 3. Upload the files:
 
    ```sh
-   php artisan audiobook:upload s3
+   php artisan audiobook:upload private
    ```
 
    This copies each book's `audio/*.mp3` and `text/*.json` from local storage into the same folders in the bucket,

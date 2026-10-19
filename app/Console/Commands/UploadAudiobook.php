@@ -7,9 +7,10 @@ use App\Http\Controllers\TextController;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Illuminate\Foundation\CloudBootstrapper;
 use Illuminate\Support\Facades\Storage;
 
-#[Signature('audiobook:upload {disk : The disk to upload to, e.g. "s3" for the Laravel Cloud bucket} {--from=local : The disk holding the files}')]
+#[Signature('audiobook:upload {disk : The disk to upload to, e.g. "private" for the Laravel Cloud bucket} {--from=local : The disk holding the files}')]
 #[Description('Copy every book\'s chapter audio and synced text to object storage')]
 class UploadAudiobook extends Command
 {
@@ -18,6 +19,12 @@ class UploadAudiobook extends Command
      */
     public function handle(): int
     {
+        // Laravel only reads the bucket from LARAVEL_CLOUD_DISK_CONFIG on Cloud;
+        // read it here too, so a copy in the local .env is enough to upload.
+        if (! laravel_cloud()) {
+            CloudBootstrapper::configureDisks($this->laravel);
+        }
+
         $from = Storage::disk($this->option('from'));
         $to = Storage::disk($this->argument('disk'));
 

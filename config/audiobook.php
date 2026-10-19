@@ -69,7 +69,7 @@ return [
     'books' => [
         'theft-of-fire' => [
             'title' => 'Theft of Fire',
-            'label' => 'Book 1',
+            'label' => 'Orbital Space #1',
             'narrator' => 'Dain Little, Emma Rae, and Ashley Crossman',
             'cover' => 'images/theft-of-fire.jpg',
             'ebook' => 'Theft of Fire - Devon Eriksen.epub',
